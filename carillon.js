@@ -47,11 +47,18 @@
     freqs = [];
     keyMap = {};
 
-    const maxW = 108;
-    const minW = 56;
+    // Size the bells to the available width so any count fits without overflow.
+    // The largest (lowest) bell is on the left and they taper down to the right.
+    const cs = getComputedStyle(bellsEl);
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const gapX = parseFloat(cs.columnGap || cs.gap) || 0;
+    const avail = bellsEl.clientWidth - padX;
+    const unit = (avail - gapX * (n - 1)) / n;
+    const maxW = Math.max(38, Math.min(132, unit));
+    const minW = maxW * 0.56;
 
     for (let i = 0; i < n; i++) {
-      const w = n === 1 ? maxW : Math.round(maxW - (maxW - minW) * (i / (n - 1)));
+      const w = n === 1 ? maxW : maxW - (maxW - minW) * (i / (n - 1));
       const key = KEYS[i];
 
       freqs[i] = noteFreq(i);
@@ -60,7 +67,7 @@
       const bell = document.createElement("button");
       bell.className = "bell";
       bell.type = "button";
-      bell.style.setProperty("--w", w + "px");
+      bell.style.setProperty("--w", w.toFixed(1) + "px");
       bell.style.zIndex = String(100 - i); // larger bells overlap smaller ones
       bell.setAttribute("aria-label", `Bell ${i + 1}, key ${keyLabel(key)}`);
       bell.innerHTML =
@@ -155,7 +162,7 @@
     const bandpass = audioCtx.createBiquadFilter();
     bandpass.type = "bandpass";
     bandpass.frequency.value = freq * 2.2;
-    bandpass.Q = 0.7;
+    bandpass.Q.value = 0.7;
     const noiseEnv = audioCtx.createGain();
     noiseEnv.gain.setValueAtTime(0.25, now);
     noiseEnv.gain.exponentialRampToValueAtTime(0.0008, now + noiseDur);
@@ -197,6 +204,13 @@
 
   volInput.addEventListener("input", () => {
     volume = parseInt(volInput.value, 10) / 100;
+  });
+
+  // Re-fit the bells to the new width when the window resizes (debounced).
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => build(parseInt(countInput.value, 10)), 150);
   });
 
   // Browsers need a user gesture before audio can start.
