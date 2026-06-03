@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carillon — a playable bell tower</title>
+  <meta name="description" content="A little web game: pick a number of bells and play them like a carillon with your keyboard." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Shared SVG gradients, defined once and referenced by every bell -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="bellGold" x1="0" y1="0" x2="0.35" y2="1">
+        <stop offset="0" stop-color="#fff1c4" />
+        <stop offset="0.35" stop-color="#e9b94f" />
+        <stop offset="0.75" stop-color="#a06d27" />
+        <stop offset="1" stop-color="#6b4215" />
+      </linearGradient>
+      <linearGradient id="bellLip" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#7a4e1c" />
+        <stop offset="1" stop-color="#3c2810" />
+      </linearGradient>
+      <radialGradient id="clapperGrad" cx="0.4" cy="0.35" r="0.7">
+        <stop offset="0" stop-color="#caa45e" />
+        <stop offset="1" stop-color="#4a3414" />
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <div class="scene">
+    <!-- Battlement crown that frames the top of the page -->
+    <div class="battlement" aria-hidden="true"></div>
+
+    <!-- The tower: two stone pillars framing the belfry opening -->
+    <div class="tower">
+      <div class="pillar pillar--left" aria-hidden="true">
+        <span class="slit"></span>
+        <span class="slit"></span>
+      </div>
+
+      <div class="belfry">
+        <div class="belfry__sky" id="sky" aria-hidden="true"></div>
+        <div class="beam" aria-hidden="true"></div>
+        <div class="bells" id="bells"></div>
+        <div class="belfry__arch" aria-hidden="true"></div>
+      </div>
+
+      <div class="pillar pillar--right" aria-hidden="true">
+        <span class="slit"></span>
+        <span class="slit"></span>
+      </div>
+    </div>
+
+    <!-- Stone base with the nameplate and controls -->
+    <div class="base">
+      <div class="nameplate">CARILLON</div>
+      <div class="controls">
+        <div class="control">
+          <label for="count">Bells</label>
+          <input id="count" type="range" min="3" max="12" value="8" />
+          <output id="countVal">8</output>
+        </div>
+        <div class="control">
+          <label for="vol">Volume</label>
+          <input id="vol" type="range" min="0" max="100" value="70" />
+        </div>
+      </div>
+      <p class="hint" id="hint">Press the highlighted keys, or click a bell, to ring it.</p>
+    </div>
+  </div>
+
+  <script src="carillon.js" defer></script>
+</body>
+</html>

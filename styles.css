@@ -1,0 +1,329 @@
+:root {
+  --stone-1: #818892;
+  --stone-2: #5f646c;
+  --stone-3: #474b52;
+  --stone-4: #34373d;
+  --mortar: #2a2c31;
+  --gold: #ffe9a8;
+  --bg: #07070d;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: #e8e2d4;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---------- overall frame ---------- */
+.scene {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: clamp(38px, 7vh, 74px) 1fr auto;
+}
+
+.scene::after {
+  /* soft vignette to give the stone depth */
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 220px rgba(0, 0, 0, 0.7);
+  z-index: 6;
+}
+
+/* Shared masonry texture for stonework */
+.battlement,
+.pillar,
+.base {
+  background-color: var(--stone-2);
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 37px, var(--mortar) 37px 40px),
+    repeating-linear-gradient(90deg, transparent 0 76px, var(--mortar) 76px 80px),
+    linear-gradient(180deg, var(--stone-1), var(--stone-3));
+}
+
+/* ---------- battlement (top crown) ---------- */
+.battlement {
+  position: relative;
+  z-index: 4;
+  border-bottom: 4px solid var(--stone-4);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  -webkit-mask:
+    repeating-linear-gradient(to right, #000 0 7%, transparent 7% 12%) top / 100% 46% no-repeat,
+    linear-gradient(#000, #000) bottom / 100% 54% no-repeat;
+  mask:
+    repeating-linear-gradient(to right, #000 0 7%, transparent 7% 12%) top / 100% 46% no-repeat,
+    linear-gradient(#000, #000) bottom / 100% 54% no-repeat;
+}
+
+/* ---------- tower body & pillars ---------- */
+.tower {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: clamp(46px, 12vw, 150px) 1fr clamp(46px, 12vw, 150px);
+  min-height: 0;
+}
+
+.pillar {
+  position: relative;
+}
+.pillar--left { box-shadow: inset -18px 0 30px rgba(0, 0, 0, 0.5); }
+.pillar--right { box-shadow: inset 18px 0 30px rgba(0, 0, 0, 0.5); }
+
+.slit {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(8px, 1vw, 12px);
+  height: clamp(38px, 7vh, 60px);
+  background: #0c0c16;
+  border-radius: 7px 7px 2px 2px;
+  box-shadow: 0 0 0 3px var(--stone-4), inset 0 0 8px #000;
+}
+.pillar .slit:nth-child(1) { top: 16%; }
+.pillar .slit:nth-child(2) { top: 46%; }
+
+/* ---------- belfry (the opening the bells hang in) ---------- */
+.belfry {
+  position: relative;
+  overflow: hidden;
+  background: #0c0a1e;
+}
+
+.belfry__sky {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(125% 85% at 50% 0%,
+    #41306f 0%, #281d56 32%, #160f38 66%, #0a0820 100%);
+}
+
+.star {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 4px #fff;
+}
+
+/* stone arch ring framing the top of the opening */
+.belfry__arch {
+  position: absolute;
+  inset: 0;
+  border: clamp(12px, 2vw, 22px) solid var(--stone-2);
+  border-bottom: none;
+  border-radius: 50% 50% 0 0 / 24% 24% 0 0;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* the headstock beam the bells hang from */
+.beam {
+  position: absolute;
+  top: clamp(34px, 11%, 104px);
+  left: 7%;
+  right: 7%;
+  height: clamp(12px, 1.8vh, 18px);
+  background: linear-gradient(180deg, #523c22, #271a0e);
+  border-radius: 4px;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  z-index: 1;
+}
+
+.bells {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: clamp(40px, 11%, 110px);
+  bottom: 5%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(4px, 1.3vw, 22px);
+  padding: 0 6%;
+  z-index: 2;
+}
+
+/* ---------- a single bell ---------- */
+.bell {
+  --w: 80px;
+  width: var(--w);
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bell__rope {
+  width: 4px;
+  height: clamp(6px, 1.6vh, 18px);
+  background: linear-gradient(180deg, #4a3415, #2a1d0d);
+  border-radius: 2px;
+}
+
+.bell__pivot {
+  width: 100%;
+  transform-origin: 50% 6%;
+  animation: sway 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+.bell svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 6px 7px rgba(0, 0, 0, 0.55));
+}
+
+.bell svg .metal {
+  fill: url(#bellGold);
+  stroke: #3a2810;
+  stroke-width: 0.6;
+}
+
+.bell__halo {
+  position: absolute;
+  top: 4%;
+  left: 50%;
+  width: 150%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -8%) scale(0.6);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 224, 150, 0.6), transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.bell__key {
+  margin-top: clamp(6px, 1.4vh, 12px);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: clamp(11px, 1.4vw, 16px);
+  line-height: 1;
+  color: var(--gold);
+  background: linear-gradient(180deg, #2c2e35, #16171c);
+  border: 1px solid #000;
+  border-radius: 6px;
+  padding: 5px 0 6px;
+  width: clamp(24px, 2.6vw, 36px);
+  text-align: center;
+  box-shadow: 0 2px 0 #000, inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition: transform 0.08s ease;
+}
+
+/* ---------- ringing state ---------- */
+.bell.is-ringing .bell__pivot {
+  animation: ring 0.9s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+.bell.is-ringing .bell__halo {
+  animation: halo 0.7s ease-out;
+}
+.bell.is-ringing .bell__key {
+  background: linear-gradient(180deg, #ffe9a8, #e8b54e);
+  color: #2e2008;
+  transform: translateY(2px);
+  box-shadow: 0 0 14px rgba(255, 214, 120, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(-1.4deg); }
+  50% { transform: rotate(1.4deg); }
+}
+
+@keyframes ring {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(13deg); }
+  28% { transform: rotate(-10deg); }
+  46% { transform: rotate(7deg); }
+  64% { transform: rotate(-4.5deg); }
+  82% { transform: rotate(2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes halo {
+  0% { opacity: 0.9; transform: translate(-50%, -8%) scale(0.55); }
+  100% { opacity: 0; transform: translate(-50%, -8%) scale(1.3); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bell__pivot { animation: none; }
+  .bell.is-ringing .bell__pivot { animation: none; }
+}
+
+/* ---------- base & controls ---------- */
+.base {
+  position: relative;
+  z-index: 4;
+  border-top: 4px solid var(--stone-4);
+  box-shadow: 0 -6px 14px rgba(0, 0, 0, 0.5);
+  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 4vw, 44px) clamp(12px, 2vh, 20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(14px, 3vw, 44px);
+}
+
+.nameplate {
+  font-size: clamp(20px, 3.4vw, 40px);
+  letter-spacing: 0.34em;
+  padding-left: 0.34em;
+  color: #ddc89a;
+  text-shadow: 0 2px 0 #000, 0 0 18px rgba(255, 210, 120, 0.3);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(14px, 3vw, 38px);
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  color: #cdc4ad;
+}
+
+.control input[type="range"] {
+  width: clamp(90px, 12vw, 150px);
+  accent-color: #e8b54e;
+  cursor: pointer;
+}
+
+.control output {
+  min-width: 1.6em;
+  text-align: center;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  flex-basis: 100%;
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  font-style: italic;
+  color: #9a917c;
+}
