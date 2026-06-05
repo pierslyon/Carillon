@@ -2,11 +2,16 @@
   "use strict";
 
   // Keys are assigned left-to-right to the bells. The first N are used.
-  const KEYS = ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "\\"];
+  // Keys assigned left-to-right to the bells (home row, then top row for the
+  // higher bells). The first N are used.
+  const KEYS = [
+    "a", "s", "d", "f", "g", "h", "j", "k", "l",
+    "q", "w", "e", "r", "t", "y", "u", "i", "o", "p",
+  ];
 
-  // Semitone offsets of a major scale; repeats up the octaves for >7 bells.
+  // Semitone offsets of a major scale; repeats up the octaves for taller sets.
   const MAJOR = [0, 2, 4, 5, 7, 9, 11];
-  const BASE_FREQ = 261.63; // C4 — the lowest, largest bell on the left.
+  const BASE_FREQ = 392.0; // G4 — the lowest, largest bell on the left.
 
   const bellsEl = document.getElementById("bells");
   const skyEl = document.getElementById("sky");

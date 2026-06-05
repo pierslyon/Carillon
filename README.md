@@ -21,10 +21,11 @@ python3 -m http.server 8000
 
 ## How to play
 
-- **Choose your bells** with the *Bells* slider (3–12). The bells are tuned to a
-  major scale — biggest/lowest on the left, smallest/highest on the right.
-- **Ring a bell** by pressing its highlighted key (`A S D F G H J K L ; ' \`),
-  or by clicking/tapping it.
+- **Choose your bells** with the *Bells* slider (3–16). The bells are tuned to a
+  G‑major scale — biggest/lowest (G) on the left, climbing to the smallest/highest
+  on the right.
+- **Ring a bell** by pressing its highlighted key (`A S D F G H J K L` then
+  `Q W E R T Y U I O P` for the higher bells), or by clicking/tapping it.
 - **Volume** is adjustable from the base.
 
 ## How it works

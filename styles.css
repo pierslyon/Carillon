@@ -283,10 +283,11 @@ body {
 
 .nameplate {
   font-size: clamp(20px, 3.4vw, 40px);
-  letter-spacing: 0.34em;
-  padding-left: 0.34em;
+  letter-spacing: 0.12em;
+  padding-left: 0.12em;
   color: #ddc89a;
   text-shadow: 0 2px 0 #000, 0 0 18px rgba(255, 210, 120, 0.3);
+  white-space: nowrap;
 }
 
 .controls {
