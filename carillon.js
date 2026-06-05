@@ -18,11 +18,13 @@
   const countInput = document.getElementById("count");
   const countVal = document.getElementById("countVal");
   const volInput = document.getElementById("vol");
+  const resonanceInput = document.getElementById("resonance");
 
   let bellEls = [];
   let freqs = [];
   let keyMap = {};
   let volume = 0.7;
+  let resonance = 1.0;
   let audioCtx = null;
 
   // The bell silhouette: crown loop, body, mouth lip, a highlight and the clapper.
@@ -142,6 +144,7 @@
     ];
 
     for (const [ratio, gain, decay] of partials) {
+      const d = decay * resonance; // resonance slider stretches/shortens the ring
       const osc = audioCtx.createOscillator();
       osc.type = "sine";
       osc.frequency.value = freq * ratio;
@@ -149,11 +152,11 @@
       const env = audioCtx.createGain();
       env.gain.setValueAtTime(0, now);
       env.gain.linearRampToValueAtTime(gain, now + 0.005);
-      env.gain.exponentialRampToValueAtTime(0.0008, now + decay);
+      env.gain.exponentialRampToValueAtTime(0.0008, now + d);
 
       osc.connect(env).connect(master);
       osc.start(now);
-      osc.stop(now + decay + 0.05);
+      osc.stop(now + d + 0.05);
     }
 
     // Short filtered-noise transient for the metallic "strike".
@@ -211,6 +214,15 @@
     volume = parseInt(volInput.value, 10) / 100;
   });
 
+  // Resonance slider: how long the bells ring out, like a piano sustain pedal.
+  // Maps 0–100 to a decay multiplier of ~0.15 (damped tap) to ~3.0 (long ring).
+  function sliderResonance() {
+    return 0.15 + (parseInt(resonanceInput.value, 10) / 100) * 2.85;
+  }
+  resonanceInput.addEventListener("input", () => {
+    resonance = sliderResonance();
+  });
+
   // Re-fit the bells to the new width when the window resizes (debounced).
   let resizeTimer = null;
   window.addEventListener("resize", () => {
@@ -224,5 +236,6 @@
   // ---------- init ----------
   makeStars();
   volume = parseInt(volInput.value, 10) / 100;
+  resonance = sliderResonance();
   build(parseInt(countInput.value, 10));
 })();

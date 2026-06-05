@@ -27,6 +27,8 @@ python3 -m http.server 8000
 - **Ring a bell** by pressing its highlighted key (`A S D F G H J K L` then
   `Q W E R T Y U I O P` for the higher bells), or by clicking/tapping it.
 - **Volume** is adjustable from the base.
+- **Resonance** sets how long the bells ring out — like a piano's sustain
+  (forte) pedal: low for a short, damped tap; high for a long cathedral ring.
 
 ## How it works
 
