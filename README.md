@@ -39,13 +39,25 @@ python3 -m http.server 8000
 - **Visuals** are CSS + SVG. The tower frame, bells, swing and halo are all drawn
   and animated in the browser.
 
+## Two pages
+
+There are two pages, switched with the tab bar at the top:
+
+- **Carillon** (`index.html`) — the keyboard instrument described above.
+- **Bell Pull** (`ring.html`) — a single large tower bell with a rope and a
+  woolly **sally**. Grab the sally and pull down (mouse or finger) to ring it;
+  pull harder for a louder strike. A **Bell size** selector swaps between bells
+  from a small high treble to a giant deep bourdon (bigger = lower & longer).
+
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `index.html` | Page structure: tower frame, belfry, controls |
-| `styles.css` | Stonework, bells and animations |
-| `carillon.js` | Bell building, keyboard mapping, audio synthesis |
+| `index.html` | Carillon page: tower frame, belfry, controls |
+| `ring.html` | Bell Pull page: big bell, rope + sally |
+| `styles.css` | Stonework, bells, sally and animations (shared) |
+| `carillon.js` | Carillon: bell building, keyboard mapping, audio |
+| `pull.js` | Bell Pull: rope drag, size selector, tower-bell audio |
 
 ## License
 

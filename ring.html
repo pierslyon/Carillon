@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>James&rsquo;s Carillon — a playable bell tower</title>
-  <meta name="description" content="A little web game: pick a number of bells and play them like a carillon with your keyboard." />
+  <title>Bell Pull — James&rsquo;s Carillon</title>
+  <meta name="description" content="Pull the woolly sally to ring a big tower bell. Choose the bell size." />
   <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
-  <!-- Shared SVG gradients, defined once and referenced by every bell -->
+  <!-- Shared SVG gradients for the bell -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="bellGold" x1="0" y1="0" x2="0.35" y2="1">
@@ -28,27 +28,35 @@
     </defs>
   </svg>
 
-  <div class="scene">
+  <div class="scene scene--pull">
     <!-- Tab bar: switch between the two instruments -->
     <nav class="tabs" aria-label="Choose instrument">
-      <a class="tab is-active" href="index.html" aria-current="page">Carillon</a>
-      <a class="tab" href="ring.html">Bell Pull</a>
+      <a class="tab" href="index.html">Carillon</a>
+      <a class="tab is-active" href="ring.html" aria-current="page">Bell Pull</a>
     </nav>
 
-    <!-- Battlement crown that frames the top of the page -->
     <div class="battlement" aria-hidden="true"></div>
 
-    <!-- The tower: two stone pillars framing the belfry opening -->
     <div class="tower">
       <div class="pillar pillar--left" aria-hidden="true">
         <span class="slit"></span>
         <span class="slit"></span>
       </div>
 
-      <div class="belfry">
+      <div class="belfry belfry--pull">
         <div class="belfry__sky" id="sky" aria-hidden="true"></div>
         <div class="beam" aria-hidden="true"></div>
-        <div class="bells" id="bells"></div>
+
+        <!-- The big bell, its rope and the woolly sally -->
+        <div class="ringer" id="ringer">
+          <div class="bigbell" id="bigbell"></div>
+          <div class="rope" id="rope"></div>
+          <div class="sally" id="sally">
+            <div class="sally__tuft"></div>
+          </div>
+          <div class="rope-tail" id="ropeTail"></div>
+        </div>
+
         <div class="belfry__arch" aria-hidden="true"></div>
       </div>
 
@@ -58,28 +66,22 @@
       </div>
     </div>
 
-    <!-- Stone base with the nameplate and controls -->
     <div class="base">
       <div class="nameplate">James&rsquo;s Carillon</div>
       <div class="controls">
         <div class="control">
-          <label for="count">Bells</label>
-          <input id="count" type="range" min="3" max="16" value="12" />
-          <output id="countVal">12</output>
+          <label for="size">Bell size</label>
+          <select id="size"></select>
         </div>
         <div class="control">
           <label for="vol">Volume</label>
-          <input id="vol" type="range" min="0" max="100" value="70" />
-        </div>
-        <div class="control">
-          <label for="resonance">Resonance</label>
-          <input id="resonance" type="range" min="0" max="100" value="50" />
+          <input id="vol" type="range" min="0" max="100" value="80" />
         </div>
       </div>
-      <p class="hint" id="hint">Press the highlighted keys, or click a bell, to ring it.</p>
+      <p class="hint">Grab the woolly sally and pull down to ring the bell.</p>
     </div>
   </div>
 
-  <script src="carillon.js?v=2" defer></script>
+  <script src="pull.js?v=1" defer></script>
 </body>
 </html>
