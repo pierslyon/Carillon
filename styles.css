@@ -430,59 +430,37 @@ body {
   100% { opacity: 0; transform: translate(-50%, -50%) scale(1.35); }
 }
 
-.rope,
-.rope-tail {
-  position: absolute;
-  left: 50%;
-  width: 7px;
-  transform: translateX(-50%);
-  background: repeating-linear-gradient(45deg, #e2cb92 0 4px, #c0a064 4px 8px);
-  border-radius: 4px;
-  z-index: 1;
-  cursor: grab;
-}
-
+/* The whole rope is the woolly sally: full length, coloured all the way down,
+   at twice the old 7px rope width. */
 .sally {
   position: absolute;
   left: 50%;
+  width: 14px;
   transform: translateX(-50%);
   z-index: 2;
   cursor: grab;
-  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.4));
-}
-.sally__tuft {
-  width: 100%;
-  height: 100%;
-  border-radius: 42% / 13%;
-  position: relative;
-  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.25);
+  border-radius: 7px;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.28);
   background: repeating-linear-gradient(
     180deg,
-    #c0303a 0 13%, #efe6d0 13% 21%, #2f5fa8 21% 35%, #efe6d0 35% 43%,
-    #c0303a 43% 57%, #efe6d0 57% 65%, #2f5fa8 65% 79%, #efe6d0 79% 87%, #c0303a 87% 100%
+    #c0303a 0 9px, #efe6d0 9px 13px, #2f5fa8 13px 22px, #efe6d0 22px 26px
   );
 }
-.sally__tuft::before {
-  /* soft, fuzzy wool halo */
+.sally::before {
+  /* soft, fuzzy wool the whole length */
   content: "";
   position: absolute;
-  inset: -6px -4px;
-  border-radius: 46% / 15%;
+  inset: -3px -5px;
+  border-radius: 9px;
   background: inherit;
-  filter: blur(4px);
-  opacity: 0.65;
+  filter: blur(3.5px);
+  opacity: 0.6;
   z-index: -1;
 }
-
-.ringer.springing .rope,
-.ringer.springing .rope-tail,
-.ringer.springing .sally {
-  transition: top 0.7s cubic-bezier(0.2, 1.25, 0.4, 1),
-    height 0.7s cubic-bezier(0.2, 1.25, 0.4, 1);
+.sally.is-grabbing {
+  cursor: grabbing;
 }
 
-.sally.is-grabbing,
-.rope.is-grabbing,
-.rope-tail.is-grabbing {
-  cursor: grabbing;
+.ringer.springing .sally {
+  transition: height 0.7s cubic-bezier(0.2, 1.25, 0.4, 1);
 }

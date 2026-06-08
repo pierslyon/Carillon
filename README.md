@@ -44,8 +44,8 @@ python3 -m http.server 8000
 There are two pages, switched with the tab bar at the top:
 
 - **Carillon** (`index.html`) — the keyboard instrument described above.
-- **Bell Pull** (`ring.html`) — a single large tower bell with a rope and a
-  woolly **sally**. Grab the sally and pull down (mouse or finger) to ring it;
+- **Bell Pull** (`ring.html`) — a single large tower bell on a full-length,
+  striped woolly **sally** rope. Grab the sally and pull down (mouse or finger) to ring it;
   pull harder for a louder strike. A **Bell size** selector swaps between bells
   from a small high treble to a giant deep bourdon (bigger = lower & longer).
 

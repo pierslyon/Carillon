@@ -35,9 +35,7 @@
 
   const ringer = document.getElementById("ringer");
   const bigbell = document.getElementById("bigbell");
-  const rope = document.getElementById("rope");
   const sally = document.getElementById("sally");
-  const ropeTail = document.getElementById("ropeTail");
   const sizeSel = document.getElementById("size");
   const volInput = document.getElementById("vol");
   const skyEl = document.getElementById("sky");
@@ -64,7 +62,7 @@
     bigbell.innerHTML = `<div class="bigbell__halo"></div>${BELL_SVG}`;
   }
 
-  // Recompute the geometry of bell, rope, sally and tail for the current size.
+  // Recompute the geometry of the bell and the sally rope for the current size.
   function layout() {
     geo.H = ringer.clientHeight;
     geo.W = ringer.clientWidth;
@@ -80,31 +78,18 @@
     bigbell.style.top = bellTop + "px";
     geo.anchorY = bellTop + geo.bellH * 0.66; // rope appears to leave the bell
 
-    geo.restTop = Math.max(geo.anchorY + 30, geo.H * 0.52);
-    geo.maxTop = geo.H * 0.78;
-    geo.sallyW = Math.round(42 + cur.scale * 16);
-    geo.sallyH = clamp(geo.H * 0.16, 70, 150);
-    geo.tailLen = geo.H * 0.1;
-
-    sally.style.width = geo.sallyW + "px";
-    sally.style.height = geo.sallyH + "px";
+    geo.restBottom = Math.max(geo.H * 0.8, geo.anchorY + 70); // where the rope hangs at rest
+    geo.maxBottom = Math.max(geo.H * 0.99, geo.restBottom + 60); // fully pulled down
 
     applyPull(pull);
   }
 
-  // Position the rope, sally and tail, and tip the bell, for a pull amount.
+  // Hang the sally rope from the bell to the current pull depth, and tip the bell.
   function applyPull(p) {
     pull = clamp01(p);
-    const sallyTop = geo.restTop + (geo.maxTop - geo.restTop) * pull;
-
-    rope.style.top = geo.anchorY + "px";
-    rope.style.height = Math.max(0, sallyTop - geo.anchorY) + "px";
-
-    sally.style.top = sallyTop + "px";
-
-    ropeTail.style.top = sallyTop + geo.sallyH + "px";
-    ropeTail.style.height = geo.tailLen + "px";
-
+    const bottomY = geo.restBottom + (geo.maxBottom - geo.restBottom) * pull;
+    sally.style.top = geo.anchorY + "px";
+    sally.style.height = Math.max(0, bottomY - geo.anchorY) + "px";
     bigbell.style.transform = `translateX(-50%) rotate(${(-MAX_ANGLE * pull).toFixed(2)}deg)`;
   }
 
@@ -118,34 +103,31 @@
   function onDown(e) {
     const x = localX(e);
     const y = localY(e);
-    const band = Math.max(geo.sallyW * 0.7, 28);
-    const top = geo.anchorY - 6;
-    const bottom = geo.maxTop + geo.sallyH + geo.tailLen + 10;
-    if (Math.abs(x - geo.cx) > band || y < top || y > bottom) return; // not on the rope
+    const bottomY = geo.restBottom + (geo.maxBottom - geo.restBottom) * pull;
+    if (Math.abs(x - geo.cx) > 32 || y < geo.anchorY - 6 || y > bottomY + 18) return; // not on the rope
 
     dragging = true;
     ensureAudio();
-    const sallyTop = geo.restTop + (geo.maxTop - geo.restTop) * pull;
-    grabOffset = y - sallyTop;
+    grabOffset = y - bottomY;
 
     ringer.classList.remove("springing");
     bigbell.classList.remove("springing");
-    [sally, rope, ropeTail].forEach((el) => el.classList.add("is-grabbing"));
+    sally.classList.add("is-grabbing");
     try { ringer.setPointerCapture(e.pointerId); } catch (_) {}
     e.preventDefault();
   }
 
   function onMove(e) {
     if (!dragging) return;
-    const sallyTop = clamp(localY(e) - grabOffset, geo.restTop, geo.maxTop);
-    applyPull((sallyTop - geo.restTop) / (geo.maxTop - geo.restTop));
+    const bottomY = clamp(localY(e) - grabOffset, geo.restBottom, geo.maxBottom);
+    applyPull((bottomY - geo.restBottom) / (geo.maxBottom - geo.restBottom));
     e.preventDefault();
   }
 
   function onUp() {
     if (!dragging) return;
     dragging = false;
-    [sally, rope, ropeTail].forEach((el) => el.classList.remove("is-grabbing"));
+    sally.classList.remove("is-grabbing");
 
     const strength = pull;
     ringer.classList.add("springing");
