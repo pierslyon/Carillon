@@ -223,80 +223,56 @@
     noise.stop(now + noiseDur);
   }
 
-  // A wetter, more realistic fart. The key to not sounding like a laser is an
-  // IRREGULAR low pitch (a random walk, not a smooth glide), an uneven
-  // "raspberry" flutter chopping the amplitude, and band-limited turbulence
-  // noise mixed in — all muffled by a low-pass.
+  // A fart is mostly wet TURBULENCE, not a tone. Build the waveform by hand:
+  // white noise gated by an irregular low-rate pulse (the "raspberry") whose
+  // rate wobbles and deflates. No oscillator (so it's not electronic) and an
+  // open filter (so it's not muffled). The pulse rate is the buzz "pitch" and
+  // loosely tracks the bell.
   function playFart(freq) {
     if (!audioCtx) return;
     const now = audioCtx.currentTime;
-    const dur = 0.35 + Math.random() * 0.45;
-    const base = Math.max(70, Math.min(170, freq / 5.5)); // low; loosely tracks the bell
-    const peak = Math.max(0.0008, volume);
+    const sr = audioCtx.sampleRate;
+    const dur = 0.3 + Math.random() * 0.5;
+    const len = Math.floor(sr * dur);
+    const gate0 = Math.max(30, Math.min(95, freq / 10)); // pulse rate = the buzz pitch
 
-    const master = audioCtx.createGain();
-    master.gain.setValueAtTime(0.0001, now);
-    master.gain.linearRampToValueAtTime(peak, now + 0.025);
-    master.gain.setValueAtTime(peak, now + dur * 0.6);
-    master.gain.exponentialRampToValueAtTime(0.0008, now + dur);
-    master.connect(audioCtx.destination);
+    const buf = audioCtx.createBuffer(1, len, sr);
+    const d = buf.getChannelData(0);
+    let phase = 0;
+    let jitter = 0;
+    for (let i = 0; i < len; i++) {
+      const p = i / len;
+      jitter += (Math.random() - 0.5) * 0.5;
+      jitter = Math.max(-0.6, Math.min(0.6, jitter));
+      const rate = Math.max(8, gate0 * (1 - 0.4 * p) * (1 + 0.4 * jitter)); // deflates + wobbles
+      phase += (2 * Math.PI * rate) / sr;
+      const g = Math.sin(phase);
+      const gate = g > 0.3 ? 1 : g > -0.2 ? 0.15 : 0; // sharp buzzy pulses with a slight leak
+      const fade = Math.min(1, p / 0.03) * Math.min(1, (1 - p) / 0.3);
+      d[i] = (Math.random() * 2 - 1) * gate * fade;
+    }
 
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+
+    // Open, broad shaping so it's a splatty raspberry rather than muffled.
+    const hp = audioCtx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 140;
+    const body = audioCtx.createBiquadFilter();
+    body.type = "bandpass";
+    body.frequency.value = 520;
+    body.Q.value = 0.5;
     const lp = audioCtx.createBiquadFilter();
     lp.type = "lowpass";
-    lp.frequency.setValueAtTime(620, now);
-    lp.frequency.linearRampToValueAtTime(360, now + dur);
-    lp.Q.value = 3;
-    lp.connect(master);
+    lp.frequency.value = 2300;
 
-    // Irregular "raspberry" flutter — modulates the amplitude of the whole sound.
-    const flutter = audioCtx.createGain();
-    const fN = Math.max(16, Math.floor(dur * 160));
-    const fcurve = new Float32Array(fN);
-    const dt = dur / fN;
-    let phase = 0;
-    let rate = 11 + Math.random() * 8;
-    for (let i = 0; i < fN; i++) {
-      phase += 2 * Math.PI * rate * dt;
-      rate += (Math.random() - 0.5) * 4;
-      rate = Math.max(7, Math.min(22, rate));
-      const sq = Math.sin(phase) >= 0 ? 1 : -1;
-      fcurve[i] = 0.5 + 0.5 * sq * (0.55 + 0.45 * Math.random());
-    }
-    flutter.gain.setValueCurveAtTime(fcurve, now, dur);
-    flutter.connect(lp);
+    const out = audioCtx.createGain();
+    out.gain.value = Math.max(0.0001, volume * 1.25);
 
-    // Buzzy tone with a random-walk pitch (the anti-laser fix).
-    const osc = audioCtx.createOscillator();
-    osc.type = "sawtooth";
-    const pN = Math.max(8, Math.floor(dur * 30));
-    const pcurve = new Float32Array(pN);
-    let f = base * (0.9 + Math.random() * 0.2);
-    for (let i = 0; i < pN; i++) {
-      f += (Math.random() - 0.5) * base * 0.4;
-      f = Math.max(base * 0.55, Math.min(base * 1.5, f));
-      pcurve[i] = f * (1 - 0.12 * (i / pN)); // gentle deflation
-    }
-    osc.frequency.setValueCurveAtTime(pcurve, now, dur);
-    osc.connect(flutter);
-
-    // Wet turbulence: band-limited noise, chopped by the same flutter.
-    const nbuf = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * dur), audioCtx.sampleRate);
-    const nd = nbuf.getChannelData(0);
-    for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = nbuf;
-    const nbp = audioCtx.createBiquadFilter();
-    nbp.type = "bandpass";
-    nbp.frequency.value = base * 2.2;
-    nbp.Q.value = 1.1;
-    const ng = audioCtx.createGain();
-    ng.gain.value = 0.4;
-    noise.connect(nbp).connect(ng).connect(flutter);
-
-    osc.start(now);
-    osc.stop(now + dur + 0.05);
-    noise.start(now);
-    noise.stop(now + dur + 0.05);
+    src.connect(hp).connect(body).connect(lp).connect(out).connect(audioCtx.destination);
+    src.start(now);
+    src.stop(now + dur + 0.05);
   }
 
   // Sprinkle a few stars behind the bells for depth.
@@ -316,6 +292,7 @@
   // ---------- events ----------
   window.addEventListener("keydown", (e) => {
     if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (document.body.classList.contains("mood-open")) return; // don't ring while a dialog is open
     const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
     if (k in keyMap) {
       ensureAudio();
