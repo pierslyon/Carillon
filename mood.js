@@ -4,7 +4,7 @@
   // ---- CONFIG ----------------------------------------------------------------
   // Paste your Google Apps Script web-app URL here (ends in /exec). Until it's
   // set, submissions are logged to the console instead of sent.
-  const ENDPOINT = "";
+  const ENDPOINT = "https://script.google.com/macros/s/AKfycbx_XJNjmVXMamfdZIf0YnskE1AqWNZCWty3EetQDgzdZf2BSRljToxNHMefs8wACrCnlA/exec";
   // Shared token — must match the SECRET in the Apps Script. Light spam guard.
   const TOKEN = "carillon-james-7f3a";
 
