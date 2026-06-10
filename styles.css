@@ -464,3 +464,40 @@ body {
 .ringer.springing .sally {
   transition: height 0.7s cubic-bezier(0.2, 1.25, 0.4, 1);
 }
+
+/* ---------- welcome message (shown on every page load) ---------- */
+.welcome {
+  position: fixed;
+  top: clamp(58px, 9vh, 96px);
+  left: 50%;
+  z-index: 50;
+  max-width: min(90vw, 470px);
+  text-align: center;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: clamp(15px, 2vw, 20px);
+  color: #2e2008;
+  background: linear-gradient(180deg, #ffe9a8, #e8b54e);
+  border: 1px solid #6b4215;
+  border-radius: 12px;
+  padding: 12px 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  transform: translate(-50%, -12px);
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 1.1, 0.4, 1);
+}
+.welcome.is-shown {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+.welcome.is-hiding {
+  opacity: 0;
+  transform: translate(-50%, -12px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome {
+    transition: opacity 0.3s ease;
+  }
+}
