@@ -565,3 +565,133 @@ body {
   box-shadow: 0 5px 12px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   z-index: 0;
 }
+
+/* ---------- mood recorder ---------- */
+.mood-trigger {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  color: #cdbd92;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.mood-trigger:hover {
+  color: var(--gold);
+  background: rgba(255, 255, 255, 0.12);
+}
+@media (max-width: 560px) {
+  .mood-trigger span { display: none; }
+}
+
+.mood-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(8, 6, 18, 0.66);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.mood-modal.is-open { opacity: 1; }
+.mood-modal[hidden] { display: none; }
+
+.mood-card {
+  position: relative;
+  width: min(94vw, 420px);
+  background: linear-gradient(180deg, #2a2c33, #181a1f);
+  border: 1px solid #6b4215;
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  text-align: center;
+  color: #e8e2d4;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: translateY(12px) scale(0.97);
+  transition: transform 0.25s cubic-bezier(0.2, 1.1, 0.4, 1);
+}
+.mood-modal.is-open .mood-card { transform: none; }
+
+.mood-q {
+  margin: 0 0 18px;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: clamp(19px, 3.4vw, 24px);
+  color: var(--gold);
+}
+.mood-close {
+  position: absolute;
+  top: 8px;
+  right: 13px;
+  background: none;
+  border: none;
+  color: #9a917c;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+.mood-close:hover { color: var(--gold); }
+
+.mood-step--emoji { display: flex; gap: 12px; justify-content: center; }
+.mood-emoji {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: 14px;
+  color: #cdc4ad;
+  background: linear-gradient(180deg, #34373f, #1d1f24);
+  border: 1px solid #000;
+  border-radius: 12px;
+  padding: 14px 6px;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s, transform 0.12s, box-shadow 0.12s;
+}
+.mood-emoji span { font-size: 38px; line-height: 1; }
+.mood-emoji:hover {
+  color: var(--gold);
+  border-color: #6b4215;
+  transform: translateY(-2px);
+  box-shadow: 0 0 14px rgba(255, 214, 120, 0.3);
+}
+
+.mood-sub { margin: 0 0 14px; color: #cdc4ad; font-size: 15px; }
+.mood-sub strong { color: var(--gold); }
+.mood-reasons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.mood-reason {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: 14px;
+  color: #2e2008;
+  background: linear-gradient(180deg, #ffe9a8, #e8b54e);
+  border: 1px solid #6b4215;
+  border-radius: 10px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.mood-reason:hover { transform: translateY(-2px); box-shadow: 0 0 14px rgba(255, 214, 120, 0.5); }
+.mood-back {
+  margin-top: 14px;
+  background: none;
+  border: none;
+  color: #9a917c;
+  font-size: 13px;
+  font-style: italic;
+  cursor: pointer;
+}
+.mood-back:hover { color: var(--gold); }
+.mood-thanks { font-size: 18px; color: var(--gold); margin: 14px 0 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mood-modal, .mood-card { transition: opacity 0.2s ease; }
+}
