@@ -573,19 +573,20 @@ body {
   top: 50%;
   transform: translateY(-50%);
   font-family: ui-serif, Georgia, "Times New Roman", serif;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.03em;
-  color: #cdbd92;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  padding: 5px 10px;
+  color: var(--gold);
+  background: rgba(255, 233, 168, 0.13);
+  border: 1px solid rgba(255, 214, 120, 0.45);
+  border-radius: 999px;
+  padding: 6px 14px;
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition: color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 .mood-trigger:hover {
-  color: var(--gold);
-  background: rgba(255, 255, 255, 0.12);
+  color: #fff4d6;
+  background: rgba(255, 233, 168, 0.24);
+  box-shadow: 0 0 12px rgba(255, 214, 120, 0.4);
 }
 @media (max-width: 560px) {
   .mood-trigger span { display: none; }
