@@ -23,12 +23,15 @@ python3 -m http.server 8000
 
 - **Choose your bells** with the *Bells* slider (3–16). The bells are tuned to a
   G‑major scale — biggest/lowest (G) on the left, climbing to the smallest/highest
-  on the right.
+  on the right. From 12 bells up they split onto **two rows**.
 - **Ring a bell** by pressing its highlighted key (`A S D F G H J K L` then
   `Q W E R T Y U I O P` for the higher bells), or by clicking/tapping it.
 - **Volume** is adjustable from the base.
 - **Resonance** sets how long the bells ring out — like a piano's sustain
   (forte) pedal: low for a short, damped tap; high for a long cathedral ring.
+- **8 bells on E** toggles a change-ringing "eight on E": it snaps to 8 bells
+  tuned to an E‑major scale.
+- **💨 Fart mode** is the fun button — it swaps the bell tones for fart noises.
 
 ## How it works
 

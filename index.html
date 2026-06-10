@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>James&rsquo;s Carillon — a playable bell tower</title>
   <meta name="description" content="A little web game: pick a number of bells and play them like a carillon with your keyboard." />
-  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="styles.css?v=6" />
 </head>
 <body>
   <!-- Shared SVG gradients, defined once and referenced by every bell -->
@@ -75,12 +75,18 @@
           <label for="resonance">Resonance</label>
           <input id="resonance" type="range" min="0" max="100" value="50" />
         </div>
+        <div class="control control--toggles">
+          <button id="etune" class="toggle-btn" type="button" aria-pressed="false"
+            title="Tune a ring of 8 bells to E major (change-ringing &ldquo;eight on E&rdquo;)">8 bells on E</button>
+          <button id="fart" class="toggle-btn toggle-btn--fun" type="button" aria-pressed="false"
+            title="Replace the bell sounds with fart noises">💨 Fart mode</button>
+        </div>
       </div>
       <p class="hint" id="hint">Press the highlighted keys, or click a bell, to ring it.</p>
     </div>
   </div>
 
   <script src="welcome.js?v=1" defer></script>
-  <script src="carillon.js?v=2" defer></script>
+  <script src="carillon.js?v=3" defer></script>
 </body>
 </html>

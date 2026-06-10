@@ -1,7 +1,6 @@
 (() => {
   "use strict";
 
-  // Keys are assigned left-to-right to the bells. The first N are used.
   // Keys assigned left-to-right to the bells (home row, then top row for the
   // higher bells). The first N are used.
   const KEYS = [
@@ -11,20 +10,28 @@
 
   // Semitone offsets of a major scale; repeats up the octaves for taller sets.
   const MAJOR = [0, 2, 4, 5, 7, 9, 11];
-  const BASE_FREQ = 392.0; // G4 — the lowest, largest bell on the left.
+  const G_BASE = 392.0; // G4 — the default lowest, largest bell on the left.
+  const E_BASE = 329.63; // E4 — for a change-ringing "eight bells on E".
+
+  const TWO_ROW_FROM = 12; // split the bells onto two rows at this count and up.
 
   const bellsEl = document.getElementById("bells");
+  const beamEl = document.querySelector(".beam");
   const skyEl = document.getElementById("sky");
   const countInput = document.getElementById("count");
   const countVal = document.getElementById("countVal");
   const volInput = document.getElementById("vol");
   const resonanceInput = document.getElementById("resonance");
+  const etuneBtn = document.getElementById("etune");
+  const fartBtn = document.getElementById("fart");
 
   let bellEls = [];
   let freqs = [];
   let keyMap = {};
   let volume = 0.7;
   let resonance = 1.0;
+  let fartMode = false; // when true, bells play fart noises instead of tones
+  let eTuning = false; // when true, a ring of 8 is tuned to E major
   let audioCtx = null;
 
   // The bell silhouette: crown loop, body, mouth lip, a highlight and the clapper.
@@ -37,68 +44,103 @@
       <ellipse cx="50" cy="88" rx="7" ry="7" fill="url(#clapperGrad)"/>
     </svg>`;
 
-  function noteFreq(i) {
+  // Bell i of a ring of n. A ring of exactly 8 with E-tuning on sounds E major.
+  function noteFreqFor(i, n) {
+    const base = eTuning && n === 8 ? E_BASE : G_BASE;
     const octave = Math.floor(i / MAJOR.length);
     const semitones = octave * 12 + MAJOR[i % MAJOR.length];
-    return BASE_FREQ * Math.pow(2, semitones / 12);
+    return base * Math.pow(2, semitones / 12);
   }
 
   function keyLabel(k) {
     return k === "\\" ? "\\" : k.toUpperCase();
   }
 
-  // (Re)build the row of bells for a given count.
+  function makeBell(i, key, w) {
+    const bell = document.createElement("button");
+    bell.className = "bell";
+    bell.type = "button";
+    bell.style.setProperty("--w", w.toFixed(1) + "px");
+    bell.style.zIndex = String(100 - i); // larger bells overlap smaller ones
+    bell.setAttribute("aria-label", `Bell ${i + 1}, key ${keyLabel(key)}`);
+    bell.innerHTML =
+      `<span class="bell__rope"></span>` +
+      `<span class="bell__halo"></span>` +
+      `<span class="bell__pivot">${BELL_SVG}</span>` +
+      `<kbd class="bell__key">${keyLabel(key)}</kbd>`;
+
+    // Stagger the idle sway so the bells don't move in lockstep.
+    const pivot = bell.querySelector(".bell__pivot");
+    pivot.style.animationDelay = (-((i * 0.37) % 4)).toFixed(2) + "s";
+
+    bell.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      ensureAudio();
+      strike(i);
+    });
+    return bell;
+  }
+
+  // (Re)build the bells for a given count. From 12 bells up they split onto
+  // two rows so each bell stays a usable size.
   function build(n) {
     bellsEl.innerHTML = "";
     bellEls = [];
     freqs = [];
     keyMap = {};
 
-    // Size the bells to the available width so any count fits without overflow.
-    // The largest (lowest) bell is on the left and they taper down to the right.
+    const twoRows = n >= TWO_ROW_FROM;
+    const perRow = twoRows ? Math.ceil(n / 2) : n;
+
+    // Size the bells to the available width so a row never overflows. The
+    // largest (lowest) bell is on the left and they taper down to the right.
     const cs = getComputedStyle(bellsEl);
     const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-    const gapX = parseFloat(cs.columnGap || cs.gap) || 0;
+    const rowGap = twoRows ? 14 : parseFloat(cs.columnGap || cs.gap) || 14;
     const avail = bellsEl.clientWidth - padX;
-    const unit = (avail - gapX * (n - 1)) / n;
-    const maxW = Math.max(38, Math.min(132, unit));
+    const cap = twoRows ? 116 : 132;
+    const unit = (avail - rowGap * (perRow - 1)) / perRow;
+    const maxW = Math.max(38, Math.min(cap, unit));
     const minW = maxW * 0.56;
+
+    bellsEl.classList.toggle("bells--stacked", twoRows);
+    if (beamEl) beamEl.style.display = twoRows ? "none" : "";
+
+    let row1 = bellsEl;
+    let row2 = null;
+    if (twoRows) {
+      row1 = document.createElement("div");
+      row1.className = "bell-row";
+      row2 = document.createElement("div");
+      row2.className = "bell-row";
+      bellsEl.append(row1, row2);
+    }
 
     for (let i = 0; i < n; i++) {
       const w = n === 1 ? maxW : maxW - (maxW - minW) * (i / (n - 1));
       const key = KEYS[i];
-
-      freqs[i] = noteFreq(i);
+      freqs[i] = noteFreqFor(i, n);
       keyMap[key] = i;
 
-      const bell = document.createElement("button");
-      bell.className = "bell";
-      bell.type = "button";
-      bell.style.setProperty("--w", w.toFixed(1) + "px");
-      bell.style.zIndex = String(100 - i); // larger bells overlap smaller ones
-      bell.setAttribute("aria-label", `Bell ${i + 1}, key ${keyLabel(key)}`);
-      bell.innerHTML =
-        `<span class="bell__rope"></span>` +
-        `<span class="bell__halo"></span>` +
-        `<span class="bell__pivot">${BELL_SVG}</span>` +
-        `<kbd class="bell__key">${keyLabel(key)}</kbd>`;
-
-      // Stagger the idle sway so the bells don't move in lockstep.
-      const pivot = bell.querySelector(".bell__pivot");
-      pivot.style.animationDelay = (-((i * 0.37) % 4)).toFixed(2) + "s";
-
-      bell.addEventListener("pointerdown", (e) => {
-        e.preventDefault();
-        ensureAudio();
-        strike(i);
-      });
-
-      bellsEl.appendChild(bell);
+      const bell = makeBell(i, key, w);
+      (twoRows ? (i < perRow ? row1 : row2) : bellsEl).appendChild(bell);
       bellEls[i] = bell;
+    }
+
+    // Two rows can be taller than the belfry; shrink the bells until they fit
+    // its height so the lower row (and its key caps) never clip.
+    if (twoRows) {
+      for (let pass = 0; pass < 4 && bellsEl.scrollHeight > bellsEl.clientHeight + 2; pass++) {
+        const factor = (bellsEl.clientHeight - 4) / bellsEl.scrollHeight;
+        for (const b of bellEls) {
+          const cur = parseFloat(b.style.getPropertyValue("--w")) || maxW;
+          b.style.setProperty("--w", Math.max(34, cur * factor).toFixed(1) + "px");
+        }
+      }
     }
   }
 
-  // Ring a bell: restart its swing animation and play the tone.
+  // Ring a bell: restart its swing animation and play a tone (or a fart).
   function strike(i) {
     const bell = bellEls[i];
     if (!bell) return;
@@ -109,7 +151,8 @@
     clearTimeout(bell._ringTimer);
     bell._ringTimer = setTimeout(() => bell.classList.remove("is-ringing"), 950);
 
-    playTone(freqs[i]);
+    if (fartMode) playFart(freqs[i]);
+    else playTone(freqs[i]);
   }
 
   function ensureAudio() {
@@ -180,6 +223,53 @@
     noise.stop(now + noiseDur);
   }
 
+  // A cheeky fart: a buzzy sawtooth through a low-pass, pitch drooping, with a
+  // square-wave LFO chopping the amplitude (the "raspberry") that slows down.
+  function playFart(freq) {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const dur = 0.4 + Math.random() * 0.3;
+    const base = Math.max(55, Math.min(240, freq / 4.2)); // higher bells -> higher farts
+    const peak = Math.max(0.0008, volume * 0.95);
+
+    const master = audioCtx.createGain();
+    master.gain.setValueAtTime(0.0001, now);
+    master.gain.exponentialRampToValueAtTime(peak, now + 0.02);
+    master.gain.setValueAtTime(peak, now + dur * 0.5);
+    master.gain.exponentialRampToValueAtTime(0.0008, now + dur);
+    master.connect(audioCtx.destination);
+
+    const lp = audioCtx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.setValueAtTime(950, now);
+    lp.frequency.exponentialRampToValueAtTime(360, now + dur);
+    lp.Q.value = 7;
+    lp.connect(master);
+
+    const osc = audioCtx.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(base * 1.3, now);
+    osc.frequency.exponentialRampToValueAtTime(base * 0.65, now + dur);
+
+    // Amplitude sputter: a square LFO (0..1) chopping the tone, slowing down.
+    const sputter = audioCtx.createGain();
+    sputter.gain.value = 0.5;
+    const lfo = audioCtx.createOscillator();
+    lfo.type = "square";
+    lfo.frequency.setValueAtTime(30, now);
+    lfo.frequency.linearRampToValueAtTime(12, now + dur);
+    const lfoDepth = audioCtx.createGain();
+    lfoDepth.gain.value = 0.5;
+    lfo.connect(lfoDepth).connect(sputter.gain);
+
+    osc.connect(sputter).connect(lp);
+
+    osc.start(now);
+    osc.stop(now + dur + 0.05);
+    lfo.start(now);
+    lfo.stop(now + dur + 0.05);
+  }
+
   // Sprinkle a few stars behind the bells for depth.
   function makeStars() {
     if (!skyEl) return;
@@ -221,6 +311,24 @@
   }
   resonanceInput.addEventListener("input", () => {
     resonance = sliderResonance();
+  });
+
+  // "8 bells on E" toggle — snaps to 8 bells and tunes them to E major.
+  etuneBtn.addEventListener("click", () => {
+    eTuning = !eTuning;
+    etuneBtn.setAttribute("aria-pressed", String(eTuning));
+    if (eTuning && parseInt(countInput.value, 10) !== 8) {
+      countInput.value = "8";
+      countVal.textContent = "8";
+    }
+    build(parseInt(countInput.value, 10));
+  });
+
+  // Fart mode toggle — the fun button.
+  fartBtn.addEventListener("click", () => {
+    fartMode = !fartMode;
+    fartBtn.setAttribute("aria-pressed", String(fartMode));
+    ensureAudio();
   });
 
   // Re-fit the bells to the new width when the window resizes (debounced).

@@ -273,12 +273,12 @@ body {
   z-index: 4;
   border-top: 4px solid var(--stone-4);
   box-shadow: 0 -6px 14px rgba(0, 0, 0, 0.5);
-  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 4vw, 44px) clamp(12px, 2vh, 20px);
+  padding: clamp(8px, 1.3vh, 15px) clamp(12px, 3vw, 36px) clamp(8px, 1.4vh, 15px);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: clamp(14px, 3vw, 44px);
+  gap: clamp(10px, 2vw, 28px);
 }
 
 .nameplate {
@@ -295,7 +295,7 @@ body {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: clamp(14px, 3vw, 38px);
+  gap: clamp(10px, 2vw, 22px);
 }
 
 .control {
@@ -308,7 +308,7 @@ body {
 }
 
 .control input[type="range"] {
-  width: clamp(90px, 12vw, 150px);
+  width: clamp(76px, 9vw, 116px);
   accent-color: #e8b54e;
   cursor: pointer;
 }
@@ -500,4 +500,68 @@ body {
   .welcome {
     transition: opacity 0.3s ease;
   }
+}
+
+/* ---------- toggle buttons (8-on-E, fart mode) ---------- */
+.control--toggles {
+  gap: 8px;
+}
+.toggle-btn {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  color: #cdc4ad;
+  background: linear-gradient(180deg, #2c2e35, #16171c);
+  border: 1px solid #000;
+  border-radius: 8px;
+  padding: 7px 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+}
+.toggle-btn:hover {
+  color: var(--gold);
+}
+.toggle-btn[aria-pressed="true"] {
+  color: #2e2008;
+  background: linear-gradient(180deg, #ffe9a8, #e8b54e);
+  border-color: #6b4215;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 12px rgba(255, 214, 120, 0.45);
+}
+.toggle-btn--fun[aria-pressed="true"] {
+  color: #1e2e0c;
+  background: linear-gradient(180deg, #bdec88, #6fae3a);
+  border-color: #3c5a1a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 12px rgba(150, 225, 95, 0.55);
+}
+
+/* ---------- two-row bell layout (12+ bells) ---------- */
+.bells.bells--stacked {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: clamp(14px, 3.5vh, 40px);
+  top: clamp(24px, 7%, 78px);
+}
+.bell-row {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(3px, 1vw, 14px);
+  width: 100%;
+  padding-top: 12px;
+}
+.bell-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 4%;
+  right: 4%;
+  height: clamp(10px, 1.6vh, 16px);
+  background: linear-gradient(180deg, #523c22, #271a0e);
+  border-radius: 4px;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  z-index: 0;
 }
