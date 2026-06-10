@@ -692,6 +692,17 @@ body {
 .mood-back:hover { color: var(--gold); }
 .mood-thanks { font-size: 18px; color: var(--gold); margin: 14px 0 6px; }
 
+/* gate mode: mandatory, no escape hatch */
+.mood-gatenote { display: none; }
+.mood-modal--gate .mood-close { display: none; }
+.mood-modal--gate .mood-gatenote {
+  display: block;
+  margin: -8px 0 16px;
+  font-size: 13px;
+  font-style: italic;
+  color: #c0a35a;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mood-modal, .mood-card { transition: opacity 0.2s ease; }
 }

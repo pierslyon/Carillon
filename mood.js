@@ -7,6 +7,18 @@
   const ENDPOINT = "";
   // Shared token — must match the SECRET in the Apps Script. Light spam guard.
   const TOKEN = "carillon-james-7f3a";
+
+  // Mandatory daily gate: on the first visit each day during this window (local
+  // 24h time) James must complete the tracker before he can play. Override for
+  // testing/demo with ?gate=FROM-TO (e.g. ?gate=0-24 to always gate).
+  let GATE_FROM = 15; // 15:00
+  let GATE_TO = 20; // 20:00 (exclusive)
+  const gp = new URLSearchParams(location.search).get("gate");
+  if (gp && /^\d{1,2}-\d{1,2}$/.test(gp)) {
+    const parts = gp.split("-").map(Number);
+    GATE_FROM = parts[0];
+    GATE_TO = parts[1];
+  }
   // ----------------------------------------------------------------------------
 
   const MOODS = [
@@ -18,6 +30,7 @@
   const LEAD = { happy: "good", mid: "OK", sad: "tough" };
 
   let mood = null;
+  let gateMode = false;
 
   // ---- modal -----------------------------------------------------------------
   const modal = document.createElement("div");
@@ -27,6 +40,7 @@
     <div class="mood-card" role="dialog" aria-modal="true" aria-labelledby="mood-q">
       <button class="mood-close" type="button" aria-label="Close">×</button>
       <h2 id="mood-q" class="mood-q">How was your day, James?</h2>
+      <p class="mood-gatenote">A quick check-in before you play 🔔</p>
       <div class="mood-step mood-step--emoji">
         ${MOODS.map((m) => `<button class="mood-emoji" type="button" data-mood="${m.key}"><span aria-hidden="true">${m.emoji}</span>${m.label}</button>`).join("")}
       </div>
@@ -54,7 +68,9 @@
     stepThanks.hidden = which !== "thanks";
   }
 
-  function open() {
+  function open(gate) {
+    gateMode = !!gate;
+    modal.classList.toggle("mood-modal--gate", gateMode);
     mood = null;
     showStep("emoji");
     modal.hidden = false;
@@ -64,16 +80,32 @@
     if (first) first.focus();
   }
 
-  function close() {
-    modal.classList.remove("is-open");
+  function close(force) {
+    if (gateMode && !force) return; // the daily gate can't be dismissed
+    gateMode = false;
+    modal.classList.remove("is-open", "mood-modal--gate");
     document.body.classList.remove("mood-open");
     setTimeout(() => { modal.hidden = true; }, 250);
   }
 
+  // ---- "done today" tracking -------------------------------------------------
+  function doneKey() {
+    return "mood:done:" + new Date().toISOString().slice(0, 10);
+  }
+  function doneToday() {
+    try { return localStorage.getItem(doneKey()) === "1"; } catch (_) { return false; }
+  }
+  function markDone() {
+    try { localStorage.setItem(doneKey(), "1"); } catch (_) {}
+  }
+
   // ---- flow ------------------------------------------------------------------
-  modal.querySelector(".mood-close").addEventListener("click", close);
+  modal.querySelector(".mood-close").addEventListener("click", () => close());
   modal.addEventListener("pointerdown", (e) => { if (e.target === modal) close(); }); // backdrop
   modal.querySelector(".mood-back").addEventListener("click", () => showStep("emoji"));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.hidden) close();
+  });
 
   stepEmoji.querySelectorAll(".mood-emoji").forEach((b) => {
     b.addEventListener("click", () => {
@@ -86,13 +118,10 @@
   stepReason.querySelectorAll(".mood-reason").forEach((b) => {
     b.addEventListener("click", () => {
       send(mood, b.dataset.reason);
+      markDone();
       showStep("thanks");
-      setTimeout(close, 1600);
+      setTimeout(() => close(true), 1600); // force-close, lifting any gate
     });
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.hidden) close();
   });
 
   function send(moodKey, reason) {
@@ -123,19 +152,19 @@
     trigger.type = "button";
     trigger.title = "Log how your day was";
     trigger.innerHTML = `🙂&nbsp;<span>Your day</span>`;
-    trigger.addEventListener("click", open);
+    trigger.addEventListener("click", () => open(false));
     tabs.appendChild(trigger);
   }
 
-  // ---- auto-prompt once per day ---------------------------------------------
+  // ---- daily gate ------------------------------------------------------------
+  // On the first visit of the day within the window, force the tracker.
   try {
-    const key = "mood:lastPrompt";
-    const today = new Date().toISOString().slice(0, 10);
-    if (localStorage.getItem(key) !== today) {
-      localStorage.setItem(key, today);
-      setTimeout(open, 1500); // let the welcome banner appear first
+    const hour = new Date().getHours();
+    const inWindow = hour >= GATE_FROM && hour < GATE_TO;
+    if (inWindow && !doneToday()) {
+      setTimeout(() => open(true), 300);
     }
   } catch (_) {
-    /* localStorage unavailable — skip the auto-prompt, the button still works */
+    /* time/localStorage unavailable — skip the gate; the button still works */
   }
 })();
