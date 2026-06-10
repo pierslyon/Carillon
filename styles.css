@@ -641,6 +641,7 @@ body {
 }
 .mood-close:hover { color: var(--gold); }
 
+.mood-step[hidden] { display: none; } /* beat the .mood-step--emoji display rule */
 .mood-step--emoji { display: flex; gap: 12px; justify-content: center; }
 .mood-emoji {
   flex: 1;
@@ -668,19 +669,25 @@ body {
 
 .mood-sub { margin: 0 0 14px; color: #cdc4ad; font-size: 15px; }
 .mood-sub strong { color: var(--gold); }
-.mood-reasons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.mood-reasons { display: flex; flex-direction: column; gap: 9px; }
 .mood-reason {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  text-align: left;
   font-family: ui-serif, Georgia, "Times New Roman", serif;
-  font-size: 14px;
+  font-size: 15px;
   color: #2e2008;
   background: linear-gradient(180deg, #ffe9a8, #e8b54e);
   border: 1px solid #6b4215;
-  border-radius: 10px;
-  padding: 10px 18px;
+  border-radius: 12px;
+  padding: 12px 16px;
   cursor: pointer;
   transition: transform 0.12s, box-shadow 0.12s;
 }
-.mood-reason:hover { transform: translateY(-2px); box-shadow: 0 0 14px rgba(255, 214, 120, 0.5); }
+.mood-reason:hover { transform: translateY(-1px); box-shadow: 0 0 14px rgba(255, 214, 120, 0.5); }
+.mood-reason__emoji { font-size: 22px; line-height: 1; }
 .mood-back {
   margin-top: 14px;
   background: none;

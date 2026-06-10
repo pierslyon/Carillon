@@ -26,8 +26,27 @@
     { key: "mid", emoji: "😐", label: "OK" },
     { key: "sad", emoji: "😞", label: "Tough" },
   ];
-  const REASONS = ["Work", "People", "Health"];
-  const LEAD = { happy: "good", mid: "OK", sad: "tough" };
+  // Contextual reasons per mood, in concrete, gentle language with an icon for
+  // visual support. Covers James's world: people/friendships, freedom & being
+  // told what to do, big feelings, and things he enjoys. Edit freely.
+  const REASONS = {
+    happy: [
+      { emoji: "🫂", label: "Someone was kind" },
+      { emoji: "🙌", label: "I got to choose" },
+      { emoji: "⭐", label: "Did something I like" },
+    ],
+    mid: [
+      { emoji: "🙂", label: "Just a normal day" },
+      { emoji: "🤷", label: "A bit of both" },
+      { emoji: "🥱", label: "A bit boring" },
+    ],
+    sad: [
+      { emoji: "👥", label: "People stuff" },
+      { emoji: "🛑", label: "Told what to do" },
+      { emoji: "🌪️", label: "Big feelings" },
+    ],
+  };
+  const LEAD = { happy: "good", mid: "just OK", sad: "tough" };
 
   let mood = null;
   let gateMode = false;
@@ -45,10 +64,8 @@
         ${MOODS.map((m) => `<button class="mood-emoji" type="button" data-mood="${m.key}"><span aria-hidden="true">${m.emoji}</span>${m.label}</button>`).join("")}
       </div>
       <div class="mood-step mood-step--reason" hidden>
-        <p class="mood-sub">What made it <strong class="mood-lead"></strong>?</p>
-        <div class="mood-reasons">
-          ${REASONS.map((r) => `<button class="mood-reason" type="button" data-reason="${r}">${r}</button>`).join("")}
-        </div>
+        <p class="mood-sub">What made today <strong class="mood-lead"></strong>?</p>
+        <div class="mood-reasons"></div>
         <button class="mood-back" type="button">← back</button>
       </div>
       <div class="mood-step mood-step--thanks" hidden>
@@ -107,20 +124,28 @@
     if (e.key === "Escape" && !modal.hidden) close();
   });
 
+  const reasonsWrap = modal.querySelector(".mood-reasons");
+
+  function renderReasons(moodKey) {
+    reasonsWrap.innerHTML = (REASONS[moodKey] || [])
+      .map((r) => `<button class="mood-reason" type="button" data-reason="${r.label}"><span class="mood-reason__emoji" aria-hidden="true">${r.emoji}</span>${r.label}</button>`)
+      .join("");
+    reasonsWrap.querySelectorAll(".mood-reason").forEach((b) => {
+      b.addEventListener("click", () => {
+        send(moodKey, b.dataset.reason);
+        markDone();
+        showStep("thanks");
+        setTimeout(() => close(true), 1600); // force-close, lifting any gate
+      });
+    });
+  }
+
   stepEmoji.querySelectorAll(".mood-emoji").forEach((b) => {
     b.addEventListener("click", () => {
       mood = b.dataset.mood;
       leadEl.textContent = LEAD[mood] || "";
+      renderReasons(mood);
       showStep("reason");
-    });
-  });
-
-  stepReason.querySelectorAll(".mood-reason").forEach((b) => {
-    b.addEventListener("click", () => {
-      send(mood, b.dataset.reason);
-      markDone();
-      showStep("thanks");
-      setTimeout(() => close(true), 1600); // force-close, lifting any gate
     });
   });
 
